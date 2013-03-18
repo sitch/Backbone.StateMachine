@@ -52,12 +52,12 @@ define(function (require) {
       transition: ''
     });
 
-    this.transitionTable = this._buildStateTransitionTable(config.transitions);
+    this.transitionTable = this._buildTransitionTable(config.transitions);
     this._extendPublicTransitions(config.transitions);
     return this;
   }
   BackboneStateMachine.prototype = {
-    _buildStateTransitionTable: function (transitions) {
+    _buildTransitionTable: function (transitions) {
       var matrix = {};
       var to, from;
 
@@ -82,14 +82,12 @@ define(function (require) {
       return matrix;
     },
     _resolveTransitionState: function (transition, args) {
-      // console.log('RESOLVE', transition, args);
-
       var from = transition.transitionState ? this.state.get('prev') : this.state.get('current');
       var to = transition.fromTo[1];
 
-      // if(_.isObject(to)) console.log("MULTI TO", to[transition.onResolve.apply(this, args || [])]);
-      // console.log("SINGLE TO", to);
-      to = _.isObject(to) ? to[transition.onResolve.apply(this, args || [])] : to;
+      if(_.isObject(to)){
+        to = to[transition.onResolve.apply(this, args || [])];
+      }
 
       if(!this.isValidTransition(from, to)) {
         throw new Error('Invalid Transition: ' + to);
@@ -130,7 +128,6 @@ define(function (require) {
       return function () {
         var args = arguments;
 
-        // console.log(name, transition, arguments)
         // If function is invoked from an improper state, ignore call
         if(self.state.get('current') !== transition.fromTo[0] && transition.fromTo[0] !== result.WILDCARD) {
           return;
@@ -188,21 +185,10 @@ define(function (require) {
       return this.state.get('state');
     },
     isValidTransition: function (from, to) {
-      // <<<<<<< Updated upstream
-      //       if(!this.transitionTable.hasOwnProperty(from)) {
-      //         from = result.WILDCARD;
-      //         if(!this.transitionTable.hasOwnProperty(from)) {
-      //           return false;
-      //         }
-      //       }
-      //       return this.transitionTable[from].hasOwnProperty(to);
-      // =======
       var isValid = this.transitionTable.hasOwnProperty(from) && this.transitionTable[from].hasOwnProperty(to);
-      var isValidWildCard = this.transitionTable.hasOwnProperty(result.WILDCARD) && this.transitionTable[result.WILDCARD].hasOwnProperty(to);
+      var isWildCard = this.transitionTable.hasOwnProperty(result.WILDCARD) && this.transitionTable[result.WILDCARD].hasOwnProperty(to);
 
-      // console.log(from, to, this.transitionTable)
-
-      return isValid || isValidWildCard;
+      return isValid || isWildCard;
     },
     cancel: function () {
       if(this.state.get('transition') === this.RESULT.ASYNC) {
