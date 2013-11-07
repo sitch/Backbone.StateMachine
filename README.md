@@ -3,7 +3,7 @@ Backbone.StateMachine
 
 State Machine for Backbone.  Useful for async transitions (via jQuery deferreds), and responding to state change events based on a configuration grammar.
 
-
+```js
 var fsm = new BackboneStateMachine({
 	initial: 'initial',
 	transitions: {
@@ -28,13 +28,8 @@ var fsm = new BackboneStateMachine({
 }
 
 fsm.getState()
-
 fsm.isValidTransition();
-
 fsm.cancel();
-
-
 fsm.initial();
-
-
 fsm.next();
+```
